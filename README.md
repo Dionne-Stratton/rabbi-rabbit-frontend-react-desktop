@@ -129,7 +129,7 @@ A list of the features planned for future release across the enitre project: des
 * Charge a monthly fee for access to app beyond the first three levels.
 
 
-## If you have ideas for more featues please reach out!
+## If you have ideas for more features please reach out!
 
 
 
