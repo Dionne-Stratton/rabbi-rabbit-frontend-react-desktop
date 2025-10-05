@@ -4,8 +4,7 @@ import axios from "axios";
 import { useHistory } from "react-router-dom";
 
 export default function AddNewText(props) {
-  const { vocab, user } = props;
-  const history = useHistory();
+  const { vocab } = props;
   const useURL = "https://reqres.in/api/users";
   const initialFormState = {
     text: "",
