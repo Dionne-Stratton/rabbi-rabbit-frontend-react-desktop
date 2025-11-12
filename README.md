@@ -40,7 +40,6 @@ Rabbi-Rabbit helps learners of the Hebrew language through a clean and interacti
 - JavaScript  
 - CSS  
 - Validation with Yup  
-- Testing with React Testing Library _(coming soon)_
 
 ---
 
@@ -56,7 +55,7 @@ Rabbi-Rabbit helps learners of the Hebrew language through a clean and interacti
 
 ## Project MVP Features
 
-Minimum viable product features across the entire project: desktop frontend, mobile frontend, and backend server.
+Minimum viable product features across the entire project: desktop frontend and backend server.
 
 ### Authorization
 
