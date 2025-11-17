@@ -25,7 +25,10 @@ import Lessons from "./components/UserPages/Lessons";
 import Reviews from "./components/UserPages/Reviews/ReviewsPage";
 
 function App() {
-  const [auth, setAuth] = useState(false);
+  //initialize auth state based on token presence to prevent flashing
+  const [auth, setAuth] = useState(() => {
+    return !!localStorage.getItem("token");
+  });
   const [user, setUser] = useState({});
   const [userLessons, setUserLessons] = useState([]);
   const [vocab, setVocab] = useState([]);
@@ -34,23 +37,27 @@ function App() {
   const [showNav, setShowNav] = useState(true);
   const [availableReviews, setAvailableReviews] = useState([]);
 
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
     getVocab(); //runs on page load
-    if (token) {
-      //run the following if there is a token
-      setAuth(true); //set auth to true
-      getUser(); //get the user data
-      if (user.user_vocab) {
-        //if the user has vocab
-        getAvailableReviews(); //get the available reviews
-      }
-    } else {
-      //if there is no token
-      setAuth(false); //set auth to false
-    } //eslint-disable-next-line
-  }, [auth]); //run this function when auth changes
+    validateToken(); //validate token on app load
+    //eslint-disable-next-line
+  }, []); //run this function once on mount
+
+  useEffect(() => {
+    //if auth is true but user data is not loaded, fetch user data
+    if (auth && (!user || !user._id)) {
+      getUser();
+    }
+    //eslint-disable-next-line
+  }, [auth]); //run when auth changes
+
+  useEffect(() => {
+    //if user data is loaded and user has vocab, get available reviews
+    if (auth && user.user_vocab && user.user_vocab.length > 0) {
+      getAvailableReviews(); //get the available reviews
+    }
+    //eslint-disable-next-line
+  }, [user.user_vocab, auth]); //run when user vocab changes
 
   function getVocab() {
     axiosWithAuth //get the vocab from the server
@@ -66,7 +73,32 @@ function App() {
       });
   }
 
+  function validateToken() {
+    const token = localStorage.getItem("token");
+    if (token) {
+      //if there is a token, validate it by fetching user data
+      axiosWithAuth
+        .get("profile") //hitting the profile endpoint
+        .then((res) => {
+          //token is valid, set auth to true and user data
+          setUser(res.data); //set the user to the response data
+          setAuth(true); //set auth to true after successful validation
+        })
+        .catch((err) => {
+          //token is invalid or expired
+          console.log("Token validation failed:", err);
+          localStorage.removeItem("token"); //remove invalid token
+          setAuth(false); //set auth to false
+          setUser({}); //clear user data
+        });
+    } else {
+      //no token found
+      setAuth(false); //set auth to false
+    }
+  }
+
   function getUser() {
+    const token = localStorage.getItem("token");
     if (token) {
       //if there is a token
       axiosWithAuth //get the user data from the server
@@ -75,6 +107,12 @@ function App() {
           setUser(res.data); //set the user to the response data
         })
         .catch((err) => {
+          //if request fails, token might be invalid
+          if (err.response?.status === 401 || err.response?.status === 403) {
+            localStorage.removeItem("token"); //remove invalid token
+            setAuth(false); //set auth to false
+            setUser({}); //clear user data
+          }
           console.log(err);
         });
     }
@@ -159,8 +197,6 @@ function App() {
             vocab={vocab}
             selectedLesson={selectedLesson}
             setSelectedLesson={setSelectedLesson}
-            user={user}
-            combineArrays={combineArrays}
           />
         </Route>
         <Route path="/study" component={Study} />
