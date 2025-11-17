@@ -42,9 +42,9 @@ const HeaderNav = (props) => {
           <NavLink className="main-nav" activeClassName="active" to="/study">
             Study
           </NavLink>
-          <NavLink className="main-nav" activeClassName="active" to="/library">
+          {/* <NavLink className="main-nav" activeClassName="active" to="/library">
             Library
-          </NavLink>
+          </NavLink> */}
           <NavLink className="main-nav" activeClassName="active" to="/help">
             Help
           </NavLink>
