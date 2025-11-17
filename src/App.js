@@ -159,8 +159,6 @@ function App() {
             vocab={vocab}
             selectedLesson={selectedLesson}
             setSelectedLesson={setSelectedLesson}
-            user={user}
-            combineArrays={combineArrays}
           />
         </Route>
         <Route path="/study" component={Study} />

@@ -1,29 +1,42 @@
 import React, { useEffect, useState } from "react";
 
 export default function Vocabulary(props) {
-  const { vocab, selectedLesson, setSelectedLesson, user, combineArrays } =
-    props;
+  const { vocab, selectedLesson, setSelectedLesson } = props;
   const [vocabLessons, setVocabLessons] = useState([]);
   const [availableLessons, setAvailableLessons] = useState([]);
 
   useEffect(() => {
-    //if vocab is loaded and a lesson is selected and the user has an available lesson
-    if (vocab.length > 0 && selectedLesson !== "" && user.available_lesson) {
+    if (vocab.length > 0) {
+      //get all unique lesson numbers from the vocab array
+      const uniqueLessons = [
+        ...new Set(
+          vocab.map((item) => item.lesson).filter((lesson) => lesson != null)
+        ),
+      ];
+      //sort the lesson numbers
+      uniqueLessons.sort((a, b) => a - b);
+      setAvailableLessons(uniqueLessons); //set the available lessons to all unique lessons
+    }
+  }, [vocab]); //run this function when vocab changes
+
+  useEffect(() => {
+    //if vocab is loaded and a lesson is selected
+    if (
+      vocab.length > 0 &&
+      selectedLesson !== "" &&
+      selectedLesson !== "Select"
+    ) {
       //filter the vocab to only include words from the selected lesson
       let vocabLessons = vocab.filter((vocabItem) => {
-        return vocabItem.lesson === Number(selectedLesson);
+        return Number(vocabItem.lesson) === Number(selectedLesson);
       });
-      //create an array of the available lesson numbers
-      let lessons = Array.from(
-        { length: user.available_lesson },
-        (_, index) => index + 1
-      );
-      //combine the user vocab and the vocab lessons into one array
-      let combinedArray = combineArrays(user.user_vocab, vocabLessons);
-      setAvailableLessons(lessons); //set the available lessons to the array of available lesson numbers
-      setVocabLessons(combinedArray); //set the vocab lessons to the combined array
+      //sort by lesson number
+      vocabLessons.sort((a, b) => (a.lesson || 0) - (b.lesson || 0));
+      setVocabLessons(vocabLessons); //set the vocab lessons to the filtered and sorted array
+    } else {
+      setVocabLessons([]); //clear vocab lessons if no lesson is selected
     } //eslint-disable-next-line
-  }, [selectedLesson]); //run this function when the selected lesson changes
+  }, [selectedLesson, vocab]); //run this function when the selected lesson changes
 
   const handleClick = (e) => {
     setSelectedLesson(e.target.value);
@@ -66,13 +79,7 @@ export default function Vocabulary(props) {
                     ? vocabItem.hebrew_with_nikkud
                     : vocabItem.hebrew_without_nikkud}
                 </p>
-                {vocabItem.rank === 0 && <p>New!</p>}
-                {/* if the rank is 0 display new */}
-                {vocabItem.rank > 11 && <p>Mastered!</p>}
-                {/* if the rank is greater than 11 display mastered */}
-                {vocabItem.rank > 0 && vocabItem.rank < 12 && (
-                  <p>Mastery: {vocabItem.rank}</p>
-                )}
+                {/* Rank info removed - showing all vocab without user data */}
               </div>
               <div className="vocab-right">
                 <p>
